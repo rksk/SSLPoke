@@ -3,7 +3,11 @@ Java tool for testing validity (certificates) of trust stores
 
 Usage:
 ```
-java -Djavax.net.ssl.trustStore=client-truststore.jks SSLPoke mydomain.com 443
+java -Djavax.net.ssl.trustStore=<client-truststore-path> SSLPoke <target-hostname> <port>
+```
+Example:
+```
+java -Djavax.net.ssl.trustStore=/path/to/app/client-truststore.jks SSLPoke mydomain.com 443
 ```
 
 - If the server certificate is trusted by the client-truststore it will print,
@@ -13,10 +17,16 @@ Successfully connected
 
 - Othwerwise it will print print an exception like this.
 ```
-javax.net.ssl.SSLHandshakeException: sun.security.validator.ValidatorException: PKIX path building failed: sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
+javax.net.ssl.SSLHandshakeException: sun.security.validator.ValidatorException: PKIX path building failed:
+sun.security.provider.certpath.SunCertPathBuilderException: unable to find valid certification path to requested target
 ```
 
-To import the public certificate of the server into the client-truststore, we can follow the steps below.
+- SSL DEBUG logs can be generated in the following way to throubleshoot the root cause of the failure.
+```
+java -Djavax.net.ssl.trustStore=/path/to/app/client-truststore.jks -Djavax.net.debug=ssl:handshake SSLPoke mydomain.com 443
+```
+
+- To import the public certificate of the server into the client-truststore, we can follow the steps below.
 
 ```
 openssl s_client -showcerts -connect mydomain.com:443 < /dev/null | openssl x509 -outform PEM > mydomain.com.pem
